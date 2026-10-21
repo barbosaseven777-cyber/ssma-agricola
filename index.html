@@ -566,12 +566,12 @@ const SVGCSS = '.ax{fill:#6f7f74;font-size:11px}.vl{fill:#18291f;font-size:12px;
 function wrapText(t, n) { const w = t.split(' '), L = []; let c = ''; w.forEach(x => { if ((c + ' ' + x).trim().length > n) { L.push(c.trim()); c = x; } else c += ' ' + x; }); if (c.trim()) L.push(c.trim()); return L; }
 function buildExport(spec) {
   const P = 28, bw = spec.w, W = bw + 2 * P, lines = wrapText(spec.sub, Math.floor(W / 6.6));
-  const top = 168 + (lines.length - 1) * 16, bodyH = spec.h, legY = top + bodyH + 18, H = legY + 62;
+  const top = 168 + (lines.length - 1) * 16, bodyH = spec.h, legY = top + bodyH + 18, H = legY + (spec.legend === false ? 34 : 62);
   const stripC = ['#50A146','#A2C63E','#F1BC27','#F39232','#E7672D'], stripW = [.05,.30,.30,.30,.05];
   const strip = y => { let x = 0, o = ''; stripC.forEach((c, i) => { const w = W * stripW[i]; o += `<rect x="${x}" y="${y}" width="${w + 1}" height="10" fill="${c}"/>`; x += w; }); return o; };
   let leg = '', lx = P;
-  ['zero','minimo','medio','target'].forEach(t => { leg += `<rect x="${lx}" y="${legY}" width="14" height="14" rx="3" fill="${TIER[t].c}" stroke="rgba(0,0,0,.3)"/><text x="${lx + 20}" y="${legY + 12}" font-size="12" fill="#465a4d"><tspan font-weight="700">${TIER[t].n}</tspan> ${TIER[t].r}</text>`; lx += 20 + (TIER[t].n.length + TIER[t].r.length) * 6.4 + 16; });
-  if (spec.meta !== false) leg += `<line x1="${lx}" x2="${lx + 24}" y1="${legY + 7}" y2="${legY + 7}" stroke="#FF1F1F" stroke-width="2.5" stroke-dasharray="6 3"/><text x="${lx + 30}" y="${legY + 12}" font-size="12" font-weight="700" fill="#465a4d">Meta</text>`;
+  if (spec.legend !== false) ['zero','minimo','medio','target'].forEach(t => { leg += `<rect x="${lx}" y="${legY}" width="14" height="14" rx="3" fill="${TIER[t].c}" stroke="rgba(0,0,0,.3)"/><text x="${lx + 20}" y="${legY + 12}" font-size="12" fill="#465a4d"><tspan font-weight="700">${TIER[t].n}</tspan> ${TIER[t].r}</text>`; lx += 20 + (TIER[t].n.length + TIER[t].r.length) * 6.4 + 16; });
+  if (spec.meta !== false && spec.legend !== false) leg += `<line x1="${lx}" x2="${lx + 24}" y1="${legY + 7}" y2="${legY + 7}" stroke="#FF1F1F" stroke-width="2.5" stroke-dasharray="6 3"/><text x="${lx + 30}" y="${legY + 12}" font-size="12" font-weight="700" fill="#465a4d">Meta</text>`;
   const upd = UPD[ST.safra], when = upd ? fmtDate(upd.quando) : '';
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><style>${SVGCSS}</style>
 <rect width="${W}" height="${H}" fill="#fff"/>${strip(0)}
@@ -921,15 +921,28 @@ const rtCell = (md, sp, u) => {
   if (RT.fail[key]) { const e = rtEst(md, sp, u); return `<b class="est" title="Estimativa pela distância em linha reta: o serviço de rotas não respondeu. Use Tentar de novo.">≈ ${e.k.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} km</b><em>≈ ${rtTempo(e.m)} · estimado</em>`; }
   return '<span class="mut">calculando…</span>';
 };
+function rtSvgTable(g, ord) {
+  const W = 820, RH = 44, HH = 40, cx = [0, 330, 575], val = (md, u) => { const k = rtKey(md, g.sp, u), r = RT.cache[k], e = r ? null : rtEst(md, g.sp, u), v = r || e, p = r ? '' : '≈ '; return [p + v.k.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' km', p + rtTempo(v.m) + (r ? '' : ' · estimado')]; };
+  let o = `<rect x="0" y="0" width="${W}" height="${HH}" fill="#f6f8f3"/><rect x="0" y="0" width="6" height="${HH + ord.length * RH}" fill="${g.sp.cor}"/>`;
+  o += `<text x="16" y="25" font-size="11.5" font-weight="800" fill="#465a4d" letter-spacing=".6">FAZENDA</text><text x="${cx[1]}" y="17" font-size="11.5" font-weight="800" fill="#465a4d" letter-spacing=".6">ROTA PRINCIPAL</text><text x="${cx[1]}" y="31" font-size="10" fill="#6f7f74">vias principais, com pedágio</text><text x="${cx[2]}" y="17" font-size="11.5" font-weight="800" fill="#465a4d" letter-spacing=".6">ROTA ALTERNATIVA</text><text x="${cx[2]}" y="31" font-size="10" fill="#6f7f74">vicinais, sem pedágio</text>`;
+  ord.forEach((u, i) => {
+    const y = HH + i * RH, a = val('principal', u), b = val('alt', u);
+    o += `<line x1="0" x2="${W}" y1="${y + RH}" y2="${y + RH}" stroke="#e0e7dd"/><text x="16" y="${y + 20}" font-size="14" font-weight="800" fill="#18291f">${esc(u.nome)}</text><text x="16" y="${y + 35}" font-size="10.5" fill="#6f7f74">${esc(u.mun)}</text>`;
+    [[cx[1], a], [cx[2], b]].forEach(([x, v]) => { o += `<text x="${x}" y="${y + 20}" font-size="14" font-weight="800" fill="#18291f">${esc(v[0])}</text><text x="${x}" y="${y + 35}" font-size="10.5" fill="#6f7f74">${esc(v[1])}</text>`; });
+  });
+  return { inner: o, w: W, h: HH + ord.length * RH };
+}
 function rtBlocks(items) {
   const groups = [];
   RT_SUP.forEach(x => REGS.forEach(r => { if (!x.regs.includes(r)) return; const us = items.filter(i => i.sp.id === x.id && i.u.regional === r).map(i => i.u); if (us.length) groups.push({ sp: x, r, us }); }));
   return groups.map(g => {
     const parts = []; const ord = g.us.slice().sort((a, b) => hav(g.sp, a) - hav(g.sp, b)); for (let i = 0; i < ord.length; i += 10) parts.push(ord.slice(i, i + 10));
     const btn = (pt, alt) => `<a class="gl" href="${gmLink(g.sp, pt, alt)}" target="_blank" rel="noopener">${alt ? 'Sem pedágio' : 'Principal'} ↗</a>`;
+    const eid = 'rt-' + g.r;
+    EXP[eid] = () => { const t = rtSvgTable(g, ord); return { title: 'Rotas · Regional ' + g.r, sub: 'Da cidade de moradia do supervisor (' + g.sp.cidade + ') até as fazendas · quilometragem e tempo médio de viagem', w: t.w, h: t.h, inner: t.inner, meta: false, legend: false }; };
     const all = parts.map((pt, i) => { const t = g.sp.cidade + ' → Regional ' + g.r + (parts.length > 1 ? ' (parte ' + (i + 1) + ')' : ''); return `<span class="gma"><b>${parts.length > 1 ? 'Parte ' + (i + 1) + ': ' : ''}todas as fazendas</b>${btn(pt, false, t)}${btn(pt, true, t)}</span>`; }).join('');
     const rows = ord.map(u => { const t = g.sp.cidade + ' → ' + u.nome; return `<tr><td class="fz"><b>${esc(u.nome)}</b><em>${esc(u.mun)}</em></td><td class="km">${rtCell('principal', g.sp, u)}</td><td class="km">${rtCell('alt', g.sp, u)}</td><td class="ab">${btn([u], false, t)}${btn([u], true, t)}</td></tr>`; }).join('');
-    return `<div class="rgrp"><div class="rghd"><h4><i style="background:${g.sp.cor}"></i>Regional ${esc(g.r)} <small>· moradia em ${esc(g.sp.cidade)}</small></h4><div class="gmall">${all}</div></div>
+    return `<div class="rgrp"><div class="rghd"><h4><i style="background:${g.sp.cor}"></i>Regional ${esc(g.r)} <small>· moradia em ${esc(g.sp.cidade)}</small></h4><div class="gmall">${all}${camBtn(eid)}</div></div>
       <table class="rt"><thead><tr><th>Fazenda</th><th>Rota principal<small>vias principais, com pedágio</small></th><th>Rota alternativa<small>vicinais, sem pedágio</small></th><th>Abrir no Google Maps</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }).join('');
 }
