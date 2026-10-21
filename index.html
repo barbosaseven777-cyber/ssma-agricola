@@ -115,6 +115,36 @@ select:focus-visible,button:focus-visible,input:focus-visible,.tab:focus-visible
 .empty{padding:28px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:10px}
 .note{font-size:12px;color:var(--muted);margin-top:14px}
 .mapwrap{position:relative}
+.rtwrap{position:relative;overflow:hidden;border-radius:8px;border:1px solid var(--line);touch-action:none;cursor:grab;user-select:none}
+.rtwrap svg{display:block;width:100%;height:auto}
+.rgrp{margin-top:18px}
+.rghd{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;margin-bottom:6px}
+.rghd h4{margin:0;font:800 15px var(--font-display);color:var(--brand);display:flex;align-items:center;gap:7px}
+.rghd h4 i{width:13px;height:13px;border-radius:3px;display:inline-block}
+.rghd small{font:600 12px var(--font-body);color:var(--muted)}
+.gmall{display:flex;flex-wrap:wrap;gap:6px 12px}
+.gma{display:inline-flex;align-items:center;gap:6px;font-size:12px}
+table.rt{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+table.rt th:nth-child(1){width:27%}table.rt th:nth-child(2),table.rt th:nth-child(3){width:21%}table.rt th:nth-child(4){width:31%}
+table.rt th{text-align:left;font:800 11px var(--font-display);letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);padding:6px 8px;border-bottom:2px solid var(--line)}
+table.rt th small{display:block;font:600 10px var(--font-body);text-transform:none;letter-spacing:0;color:var(--muted)}
+table.rt td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+td.fz em,td.km em{display:block;font-style:normal;font-size:11px;color:var(--muted)}
+td.km b{font:800 14px var(--font-display);color:var(--ink)}
+td.ab{display:flex;gap:6px;flex-wrap:wrap}
+.mut{color:var(--muted);font-size:12px}
+
+.gl{font:700 12px var(--font-display);color:var(--brand);text-decoration:none;border:1.5px solid var(--brand);border-radius:6px;padding:3px 8px;white-space:nowrap}
+.gl:hover{background:var(--panel)}
+.est{color:var(--ink2)}
+.gmgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.gmg h4{margin:0 0 6px;font:800 12px var(--font-display);color:var(--brand);display:flex;align-items:center;gap:6px}
+.gmg h4 i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.gmr{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:5px 0;border-top:1px solid var(--line);font-size:13px}
+.gmr em{display:block;font-style:normal;font-size:11px;color:var(--muted)}
+.gmr a{font:700 12px var(--font-display);color:var(--brand);text-decoration:none;border:1.5px solid var(--brand);border-radius:6px;padding:3px 8px;white-space:nowrap}
+.gmr a:hover{background:var(--panel)}
+.btn.rtb{width:auto;padding:5px 11px;font-size:13px;line-height:1.1}
 .mapwrap svg{display:block;width:100%;height:auto;max-width:760px;margin:0 auto}
 #tip{position:fixed;z-index:50;pointer-events:none;background:#18291f;color:#fff;font-size:12px;line-height:1.35;padding:7px 10px;border-radius:6px;max-width:280px;opacity:0;transition:opacity .08s}
 .msg{font-size:12px;padding:8px 10px;border-radius:6px;background:var(--panel);color:var(--ink2)}
@@ -188,6 +218,8 @@ select:focus-visible,button:focus-visible,input:focus-visible,.tab:focus-visible
     <div class="field"><h2>Safra</h2><select id="f-safra" aria-label="Safra"></select></div>
     <div class="field" id="fld-coord" hidden><h2>Coordenação</h2><div class="checks" id="f-coord"></div></div>
     <div class="field" id="fld-sup" hidden><h2>Supervisão</h2><div class="checks" id="f-sup"></div></div>
+    <div class="field" id="fld-rsup" hidden><h2>Supervisor (regional)</h2><div class="checks" id="f-rsup"></div></div>
+    <div class="field" id="fld-rmode" hidden><h2>Rotas</h2><select id="f-rmode" aria-label="Tipo de rota"><option value="principal">Rota principal (vias principais, com pedágio)</option><option value="alt">Rota alternativa (vicinais, sem pedágio)</option><option value="ambas">Principal e alternativa (comparar)</option></select></div>
     <div class="field"><h2>Regional</h2><div class="checks" id="f-reg"></div></div>
     <div class="field"><h2>Fazenda</h2><div class="scroll" id="f-faz"></div></div>
     <div class="field" id="fld-ind"><h2>Indicador</h2><select id="f-ind" aria-label="Indicador"></select></div>
@@ -195,7 +227,7 @@ select:focus-visible,button:focus-visible,input:focus-visible,.tab:focus-visible
       <select id="f-ord" aria-label="Ordem do ranking"><option value="best">Do melhor para o pior</option><option value="worst">Do pior para o melhor</option></select>
       <label class="chk" style="margin-top:6px"><input type="checkbox" id="f-apoio"><span>Incluir Manutenção e Colheita</span></label>
     </div>
-    <div class="field"><h2>Mês</h2><select id="f-mes" aria-label="Mês"></select></div>
+    <div class="field" id="fld-mes"><h2>Mês</h2><select id="f-mes" aria-label="Mês"></select></div>
     <button class="btn" id="clear" type="button">Limpar filtros</button>
     <div class="upl">
       <label class="btn alt" for="xl" style="cursor:pointer">Carregar planilha atualizada</label>
@@ -218,6 +250,7 @@ select:focus-visible,button:focus-visible,input:focus-visible,.tab:focus-visible
       <button class="tab" role="tab" aria-selected="false" data-tab="rank">Ranking</button>
       <button class="tab" role="tab" aria-selected="false" data-tab="mapa">Mapa</button>
       <button class="tab" role="tab" aria-selected="false" data-tab="hier">ScoreCard por Hierarquia</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="rotas">Rotas dos Supervisores</button>
     </div>
     <div id="view"></div>
     <p class="note" id="foot"></p>
@@ -343,7 +376,7 @@ const UPD = { '26/27': EMBED_INFO };
 const DIRTY = new Set();
 const EMPTY = { entidades: [], meses: [], avisos: [] };
 let DATA = EMBED;
-const ST = { safra: '26/27', reg: new Set(), faz: new Set(), ind: 'score', mes: 'all', tab: 'menu', coord: new Set(), sup: new Set(), ord: 'best', apoio: false, names: false };
+const ST = { rinfo: true, safra: '26/27', reg: new Set(), faz: new Set(), ind: 'score', mes: 'all', tab: 'menu', coord: new Set(), sup: new Set(), ord: 'best', apoio: false, names: false, rsup: new Set(), rmode: 'principal' };
 const $ = s => document.querySelector(s);
 const REGS = ['Norte','Expansão','Centro','Sul','Extremo Sul'];
 const PCT_IND = new Set(['Taxa Conclusão CVV','ORT','Inspeções SSMA','Taxa de Implementação','Áreas de Vivência','Treinamentos','Ônibus','Exames Periódicos','Absenteísmo de Saúde','Fumaça Preta (PG_037)']);
@@ -781,6 +814,8 @@ function fmtDate(iso) { try { return new Date(iso).toLocaleString('pt-BR', { day
 function buildFilters() {
   $('#f-safra').innerHTML = SAFRAS.map(s => `<option value="${s}">${s}${DATASETS[s] ? '' : ' (sem dados)'}</option>`).join('');
   $('#f-safra').value = ST.safra;
+  $('#f-rsup').innerHTML = RT_SUP.map(x => `<label class="chk"><input type="checkbox" data-rsup="${x.id}" ${ST.rsup.has(x.id) ? 'checked' : ''}><span>${esc(x.rotulo)}</span></label>`).join('');
+  $('#f-rmode').value = ST.rmode;
   $('#f-coord').innerHTML = HIER.coord.map(c => `<label class="chk"><input type="checkbox" data-coord="${c.id}" ${ST.coord.has(c.id) ? 'checked' : ''}><span>${esc(c.nome)}</span></label>`).join('');
   $('#f-sup').innerHTML = HIER.sup.map(s => `<label class="chk"><input type="checkbox" data-sup="${s.id}" ${ST.sup.has(s.id) ? 'checked' : ''}><span>${esc(s.nome)}</span></label>`).join('');
   $('#f-reg').innerHTML = REGS.filter(regionalOf).map(r => `<label class="chk"><input type="checkbox" data-reg="${esc(r)}" ${ST.reg.has(r) ? 'checked' : ''}><span>Regional ${esc(r)}</span></label>`).join('');
@@ -800,23 +835,142 @@ function renderUpd() {
   b.title = SITE ? 'Baixa o arquivo dados.json. Suba no GitHub, no lugar do dados.json antigo.' : !DB ? 'Salvar só funciona com o painel aberto pelo link, logado na sua conta.' : !DATASETS[ST.safra] ? 'Esta safra ainda não tem dados.' : DIRTY.has(ST.safra) ? 'Salvar a planilha carregada e atualizar o link.' : 'Gravar novamente os dados desta safra no link.';
 }
 let CH = [];
+/* ---------- rotas dos supervisores ---------- */
+const RT_SUP = [
+  { id: 'centro', rotulo: 'Centro', nome: 'Regional Centro', cidade: 'Araraquara', uf: 'SP', lon: -48.1756, lat: -21.7946, regs: ['Centro'], cor: '#E7672D' },
+  { id: 'norte', rotulo: 'Norte', nome: 'Regional Norte', cidade: 'Uberlândia', uf: 'MG', lon: -48.2772, lat: -18.9186, regs: ['Norte'], cor: '#50A146' },
+  { id: 'sul', rotulo: 'Sul / Extremo Sul', nome: 'Regional Sul / Extremo Sul', cidade: 'Botucatu', uf: 'SP', lon: -48.4455, lat: -22.8837, regs: ['Sul', 'Extremo Sul', 'Expansão'], cor: '#2A7BA0' }
+];
+const RT_HOSTS = ['https://router.project-osrm.org', 'https://routing.openstreetmap.de/routed-car'];
+const RT = { cache: {}, fail: {}, queue: [], busy: false, done: 0, total: 0, t: null };
+try { RT.cache = JSON.parse(localStorage.getItem('ssma_rotas_v3') || '{}') || {}; } catch (e) { RT.cache = {}; }
+const rtSave = () => { try { localStorage.setItem('ssma_rotas_v1', JSON.stringify(RT.cache)); } catch (e) { /* sem armazenamento */ } };
+const rtKey = (m, sp, u) => m + '|' + sp.id + '|' + u.lon.toFixed(4) + ',' + u.lat.toFixed(4);
+const rtRound = c => { const o = []; c.forEach(p => { const q = [Math.round(p[0] * 1e4) / 1e4, Math.round(p[1] * 1e4) / 1e4], l = o[o.length - 1]; if (!l || l[0] !== q[0] || l[1] !== q[1]) o.push(q); }); return o; };
+async function rtFetch(host, a, b, q) {
+  const url = host + '/route/v1/driving/' + a.lon + ',' + a.lat + ';' + b.lon + ',' + b.lat + '?overview=simplified&geometries=geojson&steps=false' + q;
+  let r; for (let t = 0; t < 3; t++) { r = await fetch(url); if (r.status !== 429 && r.status < 500) break; await new Promise(z => setTimeout(z, 1800 * (t + 1))); }
+  if (!r.ok) throw new Error('http ' + r.status);
+  const j = await r.json(); if (j.code !== 'Ok' || !j.routes || !j.routes.length) throw new Error(j.code || 'sem rota');
+  return j.routes;
+}
+function rtOverlap(a, b) { /* fração de pontos de a que ficam a menos de ~0,02° de b */
+  let n = 0; a.forEach(p => { for (let i = 0; i < b.length; i++) if (Math.abs(p[0] - b[i][0]) < 0.02 && Math.abs(p[1] - b[i][1]) < 0.02) { n++; break; } }); return n / a.length;
+}
+async function rtCompute(mode, sp, u) {
+  const from = { lon: sp.lon, lat: sp.lat };
+  const tries = mode === 'principal' ? [['', 'vias principais']] : [['&exclude=toll', 'sem pedágio'], ['&exclude=motorway', 'sem rodovias de pista dupla'], ['&alternatives=3', 'alternativa']];
+  let last = null;
+  for (const host of RT_HOSTS) for (const [q, via] of tries) {
+    try {
+      let rs = await rtFetch(host, from, u, q), r = rs[0];
+      if (mode === 'alt' && q.indexOf('alternatives') >= 0) {
+        const main = (await rtFetch(host, from, u, ''))[0].geometry.coordinates;
+        rs = rs.map(x => ({ x, o: rtOverlap(x.geometry.coordinates, main) })).sort((p, q2) => p.o - q2.o).map(z => z.x); r = rs[0];
+      }
+      return { k: Math.round(r.distance / 100) / 10, m: Math.round(r.duration / 60), v: via };
+    } catch (e) { last = e; RT.err = (e && e.message) || String(e); }
+  }
+  throw last || new Error('falhou');
+}
+async function rtRun() {
+  if (RT.busy) return; RT.busy = true;
+  while (RT.queue.length) {
+    const j = RT.queue.shift(), key = rtKey(j.mode, j.sp, j.u);
+    if (RT.cache[key] || RT.fail[key]) { RT.done++; continue; }
+    try { RT.cache[key] = await rtCompute(j.mode, j.sp, j.u); rtSave(); RT.cf = 0; } catch (e) {
+      RT.fail[key] = 1; RT.cf = (RT.cf || 0) + 1;
+      if (RT.cf >= 4) { RT.queue.splice(0).forEach(q => { RT.fail[rtKey(q.mode, q.sp, q.u)] = 1; }); break; }
+    }
+    RT.done++;
+    clearTimeout(RT.t); RT.t = setTimeout(rtRefresh, 300);
+    await new Promise(r => setTimeout(r, 650));
+  }
+  RT.busy = false; rtRefresh();
+}
+function rtEnsure(list, mode) {
+  const need = list.filter(x => !RT.cache[rtKey(mode, x.sp, x.u)] && !RT.fail[rtKey(mode, x.sp, x.u)] && !RT.queue.some(q => q.mode === mode && rtKey(q.mode, q.sp, q.u) === rtKey(mode, x.sp, x.u)));
+  if (!need.length) return;
+  need.forEach(x => RT.queue.push({ mode, sp: x.sp, u: x.u })); if (!RT.busy) { RT.done = 0; RT.total = need.length; }
+  else RT.total += need.length;
+  rtRun();
+}
+function rtItems() {
+  const { out } = mapUnits('score'), items = [];
+  out.forEach(u => { const sp = RT_SUP.find(x => x.regs.includes(u.regional)); if (sp && (!ST.rsup.size || ST.rsup.has(sp.id))) items.push({ sp, u }); });
+  return items;
+}
+const rtTempo = m => Math.floor(m / 60) + 'h' + String(m % 60).padStart(2, '0');
+function rtAt(pts, g, f) {
+  const P = pts.map(q => [g.px(q[0]), g.py(q[1])]); let L = 0; const seg = [];
+  for (let i = 1; i < P.length; i++) { const d = Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]); seg.push(d); L += d; }
+  let t = L * f, i = 0; while (i < seg.length - 1 && t > seg[i]) { t -= seg[i]; i++; }
+  const k = seg[i] ? t / seg[i] : 0; return [P[i][0] + (P[i + 1][0] - P[i][0]) * k, P[i][1] + (P[i + 1][1] - P[i][1]) * k];
+}
+const hav = (a, b) => { const R = 6371, t = x => x * Math.PI / 180, dl = t(b.lat - a.lat), dn = t(b.lon - a.lon), q = Math.sin(dl / 2) ** 2 + Math.cos(t(a.lat)) * Math.cos(t(b.lat)) * Math.sin(dn / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(q)); };
+const gmDest = u => { const m = u.mun.split(' e ')[0].replace(/\s*\((\w+)\)/, ', $1'); return 'Fazenda ' + u.nome + ', ' + m; };
+const gmOrigin = sp => sp.cidade + ', ' + sp.uf;
+const gmLink = (sp, us, alt) => {
+  const ord = us.slice().sort((a, b) => hav(sp, a) - hav(sp, b)), dest = ord[ord.length - 1], way = ord.slice(0, -1).map(gmDest);
+  return 'https://www.google.com/maps/dir/?api=1&travelmode=driving&origin=' + encodeURIComponent(gmOrigin(sp)) + '&destination=' + encodeURIComponent(gmDest(dest)) + (way.length ? '&waypoints=' + encodeURIComponent(way.join('|')) : '') + (alt ? '&avoid=tolls' : '');
+};
+const rtEst = (md, sp, u) => { const k = Math.round(hav(sp, u) * (md === 'principal' ? 1.28 : 1.4) * 10) / 10, v = md === 'principal' ? 72 : 58; return { k, m: Math.round(k / v * 60) }; };
+const rtCell = (md, sp, u) => {
+  const key = rtKey(md, sp, u), r = RT.cache[key];
+  if (r) return `<b>${r.k.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} km</b><em>${rtTempo(r.m)}</em>`;
+  if (RT.fail[key]) { const e = rtEst(md, sp, u); return `<b class="est" title="Estimativa pela distância em linha reta: o serviço de rotas não respondeu. Use Tentar de novo.">≈ ${e.k.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} km</b><em>≈ ${rtTempo(e.m)} · estimado</em>`; }
+  return '<span class="mut">calculando…</span>';
+};
+function rtBlocks(items) {
+  const groups = [];
+  RT_SUP.forEach(x => REGS.forEach(r => { if (!x.regs.includes(r)) return; const us = items.filter(i => i.sp.id === x.id && i.u.regional === r).map(i => i.u); if (us.length) groups.push({ sp: x, r, us }); }));
+  return groups.map(g => {
+    const parts = []; const ord = g.us.slice().sort((a, b) => hav(g.sp, a) - hav(g.sp, b)); for (let i = 0; i < ord.length; i += 10) parts.push(ord.slice(i, i + 10));
+    const btn = (pt, alt) => `<a class="gl" href="${gmLink(g.sp, pt, alt)}" target="_blank" rel="noopener">${alt ? 'Sem pedágio' : 'Principal'} ↗</a>`;
+    const all = parts.map((pt, i) => { const t = g.sp.cidade + ' → Regional ' + g.r + (parts.length > 1 ? ' (parte ' + (i + 1) + ')' : ''); return `<span class="gma"><b>${parts.length > 1 ? 'Parte ' + (i + 1) + ': ' : ''}todas as fazendas</b>${btn(pt, false, t)}${btn(pt, true, t)}</span>`; }).join('');
+    const rows = ord.map(u => { const t = g.sp.cidade + ' → ' + u.nome; return `<tr><td class="fz"><b>${esc(u.nome)}</b><em>${esc(u.mun)}</em></td><td class="km">${rtCell('principal', g.sp, u)}</td><td class="km">${rtCell('alt', g.sp, u)}</td><td class="ab">${btn([u], false, t)}${btn([u], true, t)}</td></tr>`; }).join('');
+    return `<div class="rgrp"><div class="rghd"><h4><i style="background:${g.sp.cor}"></i>Regional ${esc(g.r)} <small>· moradia em ${esc(g.sp.cidade)}</small></h4><div class="gmall">${all}</div></div>
+      <table class="rt"><thead><tr><th>Fazenda</th><th>Rota principal<small>vias principais, com pedágio</small></th><th>Rota alternativa<small>vicinais, sem pedágio</small></th><th>Abrir no Google Maps</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }).join('');
+}
+function rtSubText(items) {
+  const tot = items.length * 2, done = items.reduce((n, x) => n + ['principal', 'alt'].filter(md => RT.cache[rtKey(md, x.sp, x.u)]).length, 0);
+  const failed = items.reduce((n, x) => n + ['principal', 'alt'].filter(md => RT.fail[rtKey(md, x.sp, x.u)]).length, 0);
+  const st = done === tot ? `${tot} rotas calculadas pelas vias reais` : failed && !RT.busy ? `${done} de ${tot} rotas calculadas pelas vias reais · ${failed} estimadas por distância (serviço de rotas sem resposta${RT.err ? ': ' + RT.err : ''})` : `Calculando as rotas pelas vias reais: ${done + failed} de ${tot}…`;
+  return { text: st + ' · ' + scopeText(), failed };
+}
+function rtRefresh() {
+  if (ST.tab !== 'rotas') return; const box = $('#rt-tables'); if (!box) return;
+  const items = rtItems(), sub = rtSubText(items);
+  box.innerHTML = rtBlocks(items); $('#rt-sub').textContent = sub.text; $('#rt-retry-box').innerHTML = sub.failed && !RT.busy ? '<button class="btn alt rtb" id="rt-retry" type="button">Tentar de novo</button>' : '';
+}
+function viewRotas() {
+  const items = rtItems();
+  if (!items.length) return '<div class="empty">Nenhuma fazenda para os filtros escolhidos.</div>';
+  ['principal', 'alt'].forEach(md => rtEnsure(items, md));
+  const sub = rtSubText(items), g = ST.gm || {};
+  return `<div class="card"><div class="cardhead"><div><h3>Rotas dos supervisores até as fazendas</h3><div class="sub" id="rt-sub">${esc(sub.text)}</div></div><div class="hr" id="rt-retry-box">${sub.failed && !RT.busy ? '<button class="btn alt rtb" id="rt-retry" type="button">Tentar de novo</button>' : ''}</div></div><div id="rt-tables">${rtBlocks(items)}</div></div>
+  <p class="note">Quilometragem e tempo médio calculados pelas vias reais (OpenStreetMap/OSRM), da cidade onde o supervisor mora até o município de cada fazenda. Valores com ≈ são estimativas pela distância em linha reta, usadas quando o serviço de rotas não responde. A rota principal usa as vias mais rápidas, normalmente com pedágio. A alternativa evita pedágio. Os links abrem o Google Maps com o nome da fazenda como destino; "todas as fazendas" abre a regional inteira em uma única viagem, da mais próxima para a mais distante, em até 10 paradas por link. Esta tela precisa de internet.</p>`;
+}
+document.addEventListener('click', ev => { if (ev.target && ev.target.id === 'rt-retry') { RT.fail = {}; RT.err = ''; render(); } });
+
 const chartSlot = (vals, meta, k, h) => { CH.push({ vals, meta, k, h }); return `<div class="chart" data-ci="${CH.length - 1}"></div>`; };
 function drawCharts() { document.querySelectorAll('.chart[data-ci]').forEach(el => { const c = CH[+el.dataset.ci]; el.innerHTML = monthChart(c.vals, c.meta, c.k, c.h, el.clientWidth); }); }
 function render() {
   DATA = DATASETS[ST.safra] || EMPTY;
   $('#app').classList.toggle('menu', ST.tab === 'menu');
-  $('#h1').textContent = ST.tab === 'hier' ? 'ScoreCard por Hierarquia' : 'Scorecard SSMA Agrícola';
-  $('#legend').innerHTML = legendHtml();
+  $('#h1').textContent = ST.tab === 'hier' ? 'ScoreCard por Hierarquia' : ST.tab === 'rotas' ? 'Rotas dos Supervisores' : 'Scorecard SSMA Agrícola';
+  $('#legend').innerHTML = ST.tab === 'rotas' ? '' : legendHtml(); $('#fld-mes').hidden = ST.tab === 'rotas';
   const hn = ST.tab === 'hier' ? [...ST.coord].map(id => HIER.coord.find(c => c.id === id).nome).concat([...ST.sup].map(id => HIER.sup.find(s => s.id === id).nome)) : [];
-  $('#scope').textContent = `Safra ${ST.safra} · ` + (ST.tab === 'rank' || ST.tab === 'hier' ? 'Percentual do Scorecard' : indLabel()) + ` · ${mesLabel()} · ` + (hn.length ? hn.join(', ') + ' · ' : '') + scopeText();
+  $('#scope').textContent = ST.tab === 'rotas' ? `Deslocamento de cada supervisor, da cidade onde mora até as fazendas · ${scopeText()}` : `Safra ${ST.safra} · ` + (ST.tab === 'rank' || ST.tab === 'hier' || ST.tab === 'rotas' ? 'Percentual do Scorecard' : indLabel()) + ` · ${mesLabel()} · ` + (hn.length ? hn.join(', ') + ' · ' : '') + scopeText();
   document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === ST.tab));
-  $('#fld-ind').hidden = ST.tab === 'rank' || ST.tab === 'hier'; $('#fld-rank').hidden = !(ST.tab === 'rank' || ST.tab === 'hier');
+  $('#fld-ind').hidden = ST.tab === 'rank' || ST.tab === 'hier' || ST.tab === 'rotas'; $('#fld-rsup').hidden = ST.tab !== 'rotas'; $('#fld-rmode').hidden = true; $('#fld-rank').hidden = !(ST.tab === 'rank' || ST.tab === 'hier');
   $('#fld-coord').hidden = $('#fld-sup').hidden = ST.tab !== 'hier';
   for (const key in EXP) delete EXP[key];
   CH = [];
   $('#view').innerHTML = ST.tab === 'menu' ? viewMenu() : !DATA.entidades.length
     ? `<div class="empty">Ainda não há dados lançados para a safra ${ST.safra}.<br>Use "Carregar planilha atualizada" com a planilha dessa safra e depois "Salvar alterações".</div>`
-    : ST.tab === 'geral' ? viewGeral() : ST.tab === 'reg' ? viewReg() : ST.tab === 'rank' ? viewRank() : ST.tab === 'mapa' ? viewMapa() : viewHier();
+    : ST.tab === 'geral' ? viewGeral() : ST.tab === 'reg' ? viewReg() : ST.tab === 'rank' ? viewRank() : ST.tab === 'mapa' ? viewMapa() : ST.tab === 'rotas' ? viewRotas() : viewHier();
   drawCharts(); renderUpd();
   $('#foot').textContent = 'Faixas e pontuações seguem as fórmulas da planilha. Quando há mais de uma unidade no filtro, o gráfico mostra a média, como a própria planilha faz nas regionais.';
 }
@@ -826,16 +980,19 @@ document.addEventListener('change', ev => {
   else if (t.dataset.faz) { t.checked ? ST.faz.add(t.dataset.faz) : ST.faz.delete(t.dataset.faz); }
   else if (t.dataset.coord) { t.checked ? ST.coord.add(t.dataset.coord) : ST.coord.delete(t.dataset.coord); }
   else if (t.dataset.sup) { t.checked ? ST.sup.add(t.dataset.sup) : ST.sup.delete(t.dataset.sup); }
+  else if (t.dataset.rsup) { t.checked ? ST.rsup.add(t.dataset.rsup) : ST.rsup.delete(t.dataset.rsup); }
+  else if (t.id === 'f-rmode') ST.rmode = t.value;
   else if (t.id === 'f-ind') ST.ind = t.value;
   else if (t.id === 'f-mes') ST.mes = t.value;
   else if (t.id === 'f-ord') ST.ord = t.value;
   else if (t.id === 'f-apoio') ST.apoio = t.checked;
   else if (t.id === 'chk-names') ST.names = t.checked;
+  else if (t.id === 'chk-rinfo') ST.rinfo = t.checked;
   else if (t.id === 'f-safra') { ST.safra = t.value; ST.reg.clear(); ST.faz.clear(); ST.ind = 'score'; ST.mes = 'all'; DATA = DATASETS[ST.safra] || EMPTY; buildFilters(); }
   else return;
   render();
 });
-$('#clear').addEventListener('click', () => { ST.reg.clear(); ST.faz.clear(); ST.coord.clear(); ST.sup.clear(); ST.ind = 'score'; ST.mes = 'all'; ST.ord = 'best'; ST.apoio = false; buildFilters(); render(); });
+$('#clear').addEventListener('click', () => { ST.reg.clear(); ST.faz.clear(); ST.coord.clear(); ST.sup.clear(); ST.rsup.clear(); ST.rmode = 'principal'; ST.ind = 'score'; ST.mes = 'all'; ST.ord = 'best'; ST.apoio = false; buildFilters(); render(); });
 document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => { ST.tab = b.dataset.tab; render(); }));
 document.addEventListener('click', ev => { const c = ev.target.closest && ev.target.closest('.cam'); if (c) openExport(c.dataset.exp); });
 const tip = $('#tip');
