@@ -4186,6 +4186,7 @@ function slCiaWith(o, fn) {
     if (!sh.length) return { kind: 'text', title: 'Ocorrências mais recentes', notes: [], sub: 'Sem dados para estes filtros.' };
     return { kind: 'table', sub: ciaScope() + ' · da mais recente para a mais antiga', notes: [slNote('neu', N(sh.length) + ' de ' + N(L.length) + ' ocorrências. Nomes, matrículas e descrições não são exibidos.')], table: { tall: false, head: ['Data', 'Categoria', 'Regional', 'Fazenda', 'Nível', 'Tipo', 'Dias afastado'], cw: [1.3, 1.5, 1.4, 2.2, 0.9, 1.8, 1.3], align: ['c', 'l', 'l', 'l', 'c', 'l', 'c'],
       rows: sh.map(r => [{ t: r.d.split('-').reverse().join('/') }, { t: CIA_CAT[r.k] }, { t: r.reg || '' }, { t: r.faz }, { t: r.niv ? 'N' + r.niv : '—', bold: true, color: r.niv >= 4 ? '#C00000' : undefined }, { t: r.tipo || '' }, { t: r.dias ? String(r.dias) : '—' }]) } }; });
+  Object.keys(B).forEach(k => { if (B[k].src === "ci" && !B[k].opts.includes("cat")) B[k].opts.push("cat"); });
 })();
 
 function slCvAll(o) { return CVD.recs.filter(r => (o.reg === 'all' || r.reg === o.reg) && (o.mes === 'all' || r.m === o.mes)); }
