@@ -2816,9 +2816,10 @@ $('#ciaxl').addEventListener('change', async ev => {
     if (!nomes.length) throw new Error('Não encontrei as abas de ocorrências (Pessoais, Patrimoniais ou Ambientais) neste arquivo.');
     const p = ciaParse(nomes.map(n => ({ nome: n, aoa: XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: true, defval: null }) })));
     if (!p.recs.length) throw new Error(p.avisos.join(' ') || 'Não encontrei ocorrências neste arquivo.');
+    let paMsg = ''; try { const nmP = wb.SheetNames.find(n => /plano.*acao/.test(ciaNorm(n))); if (nmP && typeof paImportCia === 'function') { const ri = paImportCia(XLSX.utils.sheet_to_json(wb.Sheets[nmP], { header: 1, raw: true, defval: null, range: { s: { r: 0, c: 0 }, e: { r: 4000, c: 80 } } })); paMsg = ri.n ? ' ' + ri.n + ' plano(s) de ação novo(s) da investigação já foram para Planos de Ação.' : ri.tot ? ' Os planos de ação da investigação já estavam em Planos de Ação.' : ''; } } catch (e) { paMsg = ' Não consegui trazer os planos de ação: ' + (e.message || e); }
     ciaSet(p.recs, f.name, new Date().toISOString(), p.avisos); CIADIRTY = true; CIAS.pg = 50; CIAS.safra = ''; CIAS.mes = 'all'; ciaBuildFilters(); render();
     const c = cvCount(CIA.recs, r => r.k);
-    ciaMsg(`Base "${f.name}" carregada: ${cvN(CIA.recs.length)} ocorrências (${cvN(c.get('P') || 0)} pessoais, ${cvN(c.get('T') || 0)} patrimoniais, ${cvN(c.get('A') || 0)} ambientais). ` + p.avisos.join(' ') + (SITE ? (GH && tokGet() ? ' Salvando no GitHub…' : ' Clique em Baixar cia.json e suba o arquivo no GitHub para todos verem.') : DB ? ' Salvando no link…' : ' Abra o painel pelo link para salvar.'), 'ok');
+    ciaMsg(`Base "${f.name}" carregada: ${cvN(CIA.recs.length)} ocorrências (${cvN(c.get('P') || 0)} pessoais, ${cvN(c.get('T') || 0)} patrimoniais, ${cvN(c.get('A') || 0)} ambientais). ` + p.avisos.join(' ') + paMsg + (SITE ? (GH && tokGet() ? ' Salvando no GitHub…' : ' Clique em Baixar cia.json e suba o arquivo no GitHub para todos verem.') : DB ? ' Salvando no link…' : ' Abra o painel pelo link para salvar.'), 'ok');
     if (DB || (SITE && GH && tokGet())) ciaDoSave(true);
   } catch (e) { ciaMsg(e.message || 'Não consegui ler o arquivo.', 'err'); }
   ev.target.value = '';
@@ -3706,7 +3707,7 @@ function paViewGraf() {
   const rank = cvBars([...cvCount(L.filter(p => p.faz), p => p.faz).entries()].map(([k, n]) => { const l = L.filter(p => p.faz === k && p.status !== 'Cancelado'); return { label: k, v: l.length ? Math.round(l.reduce((s, p) => s + (p.status === 'Concluído' ? 100 : p.prog || 0), 0) / l.length) : 0, color: '#50A146', n }; }).sort((a, b) => b.v - a.v).slice(0, 12), W, { lw: 200, total: 100 });
   const sec = [...cvCount(L, p => p.secao || 'Sem seção').entries()].sort((a, b) => b[1] - a[1]).slice(0, 10), secO = cvBars(sec.map(([k, v]) => ({ label: k, v, color: '#E7672D' })), W, { lw: 200, total: L.length });
   const tec = [...cvCount(L.filter(p => p.tec), p => (CAD.tec.find(t => t.id === p.tec) || {}).nome || p.tec).entries()].sort((a, b) => b[1] - a[1]).slice(0, 10), tecO = tec.length ? cvBars(tec.map(([k, v]) => ({ label: k, v, color: '#7B5EA7' })), W, { lw: 200, total: L.filter(p => p.tec).length }) : null;
-  const comEt = L.filter(p => (p.etapas || []).length && p.inicio && p.prazo), curSel = comEt.find(p => p.id === PAS.curva) ? [comEt.find(p => p.id === PAS.curva)] : comEt, cs = paCurvaS(curSel, W, 380);
+  const comEt = L.filter(p => p.cat !== 'cia' && (p.etapas || []).length && p.inicio && p.prazo), curSel = comEt.find(p => p.id === PAS.curva) ? [comEt.find(p => p.id === PAS.curva)] : comEt, cs = paCurvaS(curSel, W, 380);
   const curvaBox = `<div class="cdact" style="margin:0 0 8px;align-items:center"><label class="cdf" style="min-width:320px"><span>Curva S de</span><select id="pa-curva"><option value="all">Todos os planos com etapas (${comEt.length})</option>${comEt.map(p => `<option value="${esc(p.id)}" ${PAS.curva === p.id ? 'selected' : ''}>${esc(p.id)} · ${esc(p.titulo.slice(0, 60))}</option>`).join('')}</select></label></div>` + (cs ? `<div class="cards one">${cvCard('pa-g-curva', 'Curva S: previsto × realizado (' + (curSel.length === 1 ? curSel[0].id : curSel.length + ' planos com etapas') + ')', sub, cs.inner, W, cs.h)}</div>` + (curSel.length === 1 ? `<div class="cards one"><div class="card"><h3>Etapas do plano ${esc(curSel[0].id)}</h3>${paEtapasTab(curSel[0])}</div></div>` : '') : '<div class="empty">A Curva S aparece para planos com etapas, início e prazo. Cadastre as etapas e o % realizado de cada uma.</div>');
   const setL = Object.keys(PA_SET).filter(k => L.some(p => paSetIds(p).includes(k))), setC = setL.length ? cvCols(setL.map(k => PA_SET[k]), PA_ST.map(s => ({ name: s, color: PA_STC[s], vals: setL.map(k => L.filter(p => paSetIds(p).includes(k) && paEff(p) === s).length) })), W, 300) : null;
   const rpg = [...cvCount(L.filter(p => p.resp), p => p.resp).entries()].map(([k, n]) => { const l = L.filter(p => p.resp === k && p.status !== 'Cancelado'); return { label: k, v: l.length ? Math.round(l.reduce((s, p) => s + (p.status === 'Concluído' ? 100 : p.prog || 0), 0) / l.length) : 0, color: '#2A7BA0', n }; }).sort((a, b) => b.v - a.v).slice(0, 14), rpgO = rpg.length ? cvBars(rpg, W, { lw: 200, total: 100 }) : null;
@@ -4133,8 +4134,8 @@ function paAndamentoForm(p) {
     <div class="cdact">${paBtn('pa-cs-save', 'Salvar andamento', `data-id="${esc(p.id)}"`, 'pri')}</div></div>`;
 }
 function paViewCurva() {
-  const all = paF(PA.planos).filter(p => p.inicio && p.prazo), semDatas = paF(PA.planos).length - all.length;
-  if (!all.length) return '<div class="empty">Nenhum plano com início e prazo para mostrar a Curva S. Cadastre planos com datas (e etapas) ou ajuste os filtros.</div>';
+  const base = paF(PA.planos).filter(p => p.cat !== 'cia'), all = base.filter(p => p.inicio && p.prazo), semDatas = base.length - all.length;
+  if (!all.length) return '<div class="empty">Nenhum plano com início e prazo para mostrar a Curva S (os planos das investigações de acidentes não entram na Curva S). Cadastre planos com datas (e etapas) ou ajuste os filtros.</div>';
   const um = all.find(p => p.id === PAS.curva), sel = um ? [um] : all.filter(p => (p.etapas || []).length), usa = sel.length ? sel : all, W = 1060, c = paCurvaS(usa, W, 440);
   const opt = `<option value="all">Todos os planos com etapas (${all.filter(p => (p.etapas || []).length).length})</option>` + all.map(p => `<option value="${esc(p.id)}" ${PAS.curva === p.id ? 'selected' : ''}>${esc(p.id)} · ${esc((p.titulo || '').slice(0, 70))}${(p.etapas || []).length ? ' · ' + p.etapas.length + ' etapa(s)' : ' · sem etapas'}</option>`).join('');
   const tile = (k, v, s, col) => `<div class="tile" style="border-top:4px solid ${col}"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`, st = paQSt(c.dev);
@@ -4155,6 +4156,28 @@ function paDedupe() {
   let n = 0; const score = p => Object.values(p).filter(v => v != null && v !== '' && !(Array.isArray(v) && !v.length)).length + (p.cat !== 'out' ? 3 : 0) + (p.status === 'Concluído' ? 2 : 0);
   paDupGroups().forEach(l => { l.sort((a, b) => score(b) - score(a) || (b.atualizado || '').localeCompare(a.atualizado || '')); const k = l[0]; l.slice(1).forEach(d => { Object.keys(d).forEach(f => { const v = d[f]; if (['id', 'hist', 'criado'].includes(f)) return; const vazio = x => x == null || x === '' || (Array.isArray(x) && !x.length) || (typeof x === 'number' && !x); if (vazio(k[f]) && !vazio(v)) k[f] = v; }); PA.planos = PA.planos.filter(x => x !== d); n++; }); });
   return n;
+}
+
+/* Planos de ação vindos da planilha do CIA (aba "Plano Ação"): só entram os que ainda não existem */
+function paImportCia(aoa) {
+  const nz = s => paN(String(s == null ? '' : s)), hi = aoa.findIndex(r => (r || []).some(c => /numero da ocorrencia/.test(nz(c))));
+  if (hi < 0) return { n: 0, tot: 0, msg: 'aba de planos sem cabeçalho "Número da Ocorrência"' };
+  const hd = aoa[hi].map(nz), col = re => hd.findIndex(h => re.test(h)), C = { cod: col(/numero da ocorrencia/), cls: col(/^classificacao/), data: col(/^data$/), niv: col(/^nivel/), faz: col(/^fazenda/), reg: col(/^regional/), causa: col(/^causa raiz/), acao: col(/^acao$/), rp: col(/responsavel pelo plano/), prop: col(/data\s*proposta/), conc: col(/data de conclusao/), st: col(/^status/), ac: col(/responsavel pelo acompanhamento/), efi: col(/eficaz/), obs: col(/^observacao/) };
+  const g = (r, k) => C[k] >= 0 && r[C[k]] != null ? String(r[C[k]]).replace(/[\s ]+/g, ' ').trim() : '', dd = (r, k) => { const v = C[k] >= 0 ? r[C[k]] : null; if (v == null || v === '') return ''; return paUpData(typeof v === 'number' ? String(Math.floor(v)) : String(v)) || ''; };
+  const SET = { pessoal: 'Segurança', patrimonial: 'Segurança', ambiental: 'Meio Ambiente' }, head = PA_UPF.map(f => f[1]), ix = {}; PA_UPF.forEach((f, i) => { ix[f[0]] = i; });
+  const rows = [head], tit = new Map(); let tot = 0;
+  aoa.slice(hi + 1).forEach(r => { r = r || []; const cod = g(r, 'cod'), acao = g(r, 'acao'); if (!cod || !acao) return; tot++;
+    let t = acao.slice(0, 110); const kt = paKey(t), outro = PA.planos.some(p => paKey(p.titulo) === kt && (p.vinc || {}).cod && p.vinc.cod !== cod) || (tit.has(kt) && tit.get(kt) !== cod); if (outro) t += ' [' + cod + ']'; tit.set(kt, cod);
+    const x = new Array(head.length).fill(''), resp = g(r, 'ac') || g(r, 'rp'), obs = [];
+    if (g(r, 'ac') && g(r, 'rp')) obs.push('Área responsável: ' + g(r, 'rp')); if (dd(r, 'conc')) obs.push('Concluído em ' + dd(r, 'conc').split('-').reverse().join('/')); if (g(r, 'efi')) obs.push('Eficácia: ' + g(r, 'efi')); if (g(r, 'obs')) obs.push('Observação: ' + g(r, 'obs')); obs.push('Ocorrência ' + cod + (g(r, 'cls') ? ' (' + g(r, 'cls') + (g(r, 'niv') ? ', ' + g(r, 'niv') : '') + ')' : ''));
+    Object.assign(x, { [ix.titulo]: t, [ix.cat]: 'CIA - Investigação de Acidentes', [ix.setores]: SET[paN(g(r, 'cls'))] || '', [ix.cod]: cod, [ix.reg]: g(r, 'reg'), [ix.faz]: g(r, 'faz'), [ix.problema]: g(r, 'causa'), [ix.acao]: acao, [ix.resp]: resp, [ix.status]: g(r, 'st'), [ix.inicio]: dd(r, 'data'), [ix.prazo]: dd(r, 'prop'), [ix.obs]: obs.join('; ') });
+    rows.push(x); });
+  if (rows.length < 2) return { n: 0, tot, msg: '' };
+  const up = { rows, head: true, hrow: 0, map: {}, novaCat: false, upd: false }; PA_UPF.forEach((f, i) => { up.map[f[0]] = i; });
+  const r = paUpBuild(up), novos = r.planos.filter(x => !x._exist && !PA.planos.some(p => (p.vinc || {}).cod === x.vinc.cod && paKey(p.titulo) === paKey(x.titulo))), hoje = paHoje();
+  novos.forEach(x => { delete x._exist; x.id = paNovoId(x.cat); x.hist = []; x.criado = hoje; paHistUp(x); PA.planos.push(x); });
+  if (novos.length) { paSave(); paNormOnce(true); }
+  return { n: novos.length, tot, msg: '' };
 }
 /* ================= DDS - Diálogo Diário de Segurança ================= */
 const DDS = DDS_RAW.map(r => ({ c: r[0], nr: r[1], cat: r[2], area: 'Agrícola', op: r[4], t: r[5], ro: r[6], pk: r[7] }));
