@@ -229,7 +229,7 @@ html[data-theme=dark] .hero,html[data-theme=dark] .node,html[data-theme=dark] .m
 html[data-theme=dark]{--bg:#0f1a14;--panel:#16241c;--card:#1a2a21;--ink:#e8f0ea;--ink2:#b9c8bd;--muted:#8fa496;--line:#2c3f33;--brand:#5BC083;--brand2:#8ed05a;--focus:#7ad79b;color-scheme:dark}
 html[data-theme=dark] body{background:var(--bg);color:var(--ink)}
 html[data-theme=dark] .hero,html[data-theme=dark] .node,html[data-theme=dark] .mbox,html[data-theme=dark] .ddi,html[data-theme=dark] .ddsb,html[data-theme=dark] .dsheet,html[data-theme=dark] .slslot,html[data-theme=dark] .sli.on,html[data-theme=dark] .sli .a button,html[data-theme=dark] .plk,html[data-theme=dark] .hbtn,html[data-theme=dark] .cpchip,html[data-theme=dark] .cpseg button,html[data-theme=dark] .cdpill,html[data-theme=dark] .slx-b,html[data-theme=dark] .pform input[type=date],html[data-theme=dark] .cdf input[type=text],html[data-theme=dark] .cdf select,html[data-theme=dark] .cdmeta,html[data-theme=dark] .slf select,html[data-theme=dark] .slf textarea,html[data-theme=dark] .slf input[type=text],html[data-theme=dark] .cald span,html[data-theme=dark] .langb,html[data-theme=dark] .langm,html[data-theme=dark] .themeb,html[data-theme=dark] .card,html[data-theme=dark] input,html[data-theme=dark] select,html[data-theme=dark] textarea{background:var(--card);color:var(--ink)}
-html[data-theme=dark] .btn,html[data-theme=dark] .grp[aria-pressed=true],html[data-theme=dark] .mod[aria-pressed=true],html[data-theme=dark] .cpchip.on,html[data-theme=dark] .cpseg button.on,html[data-theme=dark] .cdpill[aria-pressed="true"],html[data-theme=dark] .slx-b.pri,html[data-theme=dark] .cald input:checked+span,html[data-theme=dark] .plk:hover,html[data-theme=dark] .hbtn:hover,html[data-theme=dark] .cpchip.on small,html[data-theme=dark] #fclose,html[data-theme=dark] #fbtn,html[data-theme=dark] .cald input:checked+span small{color:#07140d}
+html[data-theme=dark] .btn,html[data-theme=dark] .grp[aria-pressed=true],html[data-theme=dark] .mod[aria-pressed=true],html[data-theme=dark] .mod2[aria-pressed=true],html[data-theme=dark] .cpchip.on,html[data-theme=dark] .cpseg button.on,html[data-theme=dark] .cdpill[aria-pressed="true"],html[data-theme=dark] .slx-b.pri,html[data-theme=dark] .cald input:checked+span,html[data-theme=dark] .plk:hover,html[data-theme=dark] .hbtn:hover,html[data-theme=dark] .cpchip.on small,html[data-theme=dark] #fclose,html[data-theme=dark] #fbtn,html[data-theme=dark] .cald input:checked+span small{color:#07140d}
 html[data-theme=dark] .btn:hover{background:#79cf9a;border-color:#79cf9a}
 html[data-theme=dark] .btn.alt{background:var(--bg);color:var(--brand)}
 html[data-theme=dark] .btn.alt:hover{background:var(--panel)}
@@ -275,8 +275,8 @@ html[data-theme=dark] [style*="color:#6F7F74" i]{color:var(--muted)!important}
 .langm li{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;font:600 14px/1.1 var(--font-body,inherit)}
 .langm li:hover,.langm li[aria-selected=true]{background:rgba(80,161,70,.14)}
 .flag{flex:none;border-radius:3px;display:block}
-.mod{font:800 13px var(--font-display);border:2px solid var(--brand);background:var(--bg);color:var(--brand);border-radius:999px;padding:7px 16px;cursor:pointer}
-.mod[aria-pressed=true]{background:var(--brand);color:#fff}
+.mod,.mod2{font:800 13px var(--font-display);border:2px solid var(--brand);background:var(--bg);color:var(--brand);border-radius:999px;padding:7px 16px;cursor:pointer}
+.mod[aria-pressed=true],.mod2[aria-pressed=true]{background:var(--brand);color:#fff}
 .mod.mod-sl{border-color:#E7672D;color:#E7672D}.mod.mod-sl[aria-pressed=true],.mod.mod-sl:hover{background:#E7672D;color:#fff}
 .calg{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}.calg b{font:800 10px var(--font-display);color:var(--muted);text-align:center;text-transform:uppercase}.cald{display:block;cursor:pointer}.cald input{position:absolute;opacity:0;pointer-events:none}.cald span{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:34px;border:1px solid var(--line);border-radius:7px;font:800 12px var(--font-display);background:#fff;color:var(--ink)}.cald small{font:700 9px var(--font-display);color:var(--muted)}.cald.zero span{opacity:.4}.cald input:checked+span{background:var(--brand);color:#fff;border-color:var(--brand)}.cald input:checked+span small{color:#fff}.cald input:focus-visible+span{outline:2px solid #E7672D}
 .gutbox{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#f8fbf6;margin:4px 0 10px}.gutres{font-size:13px;margin-top:4px}
@@ -513,6 +513,11 @@ html[data-theme=dark] [style*="color:#6F7F74" i]{color:var(--muted)!important}
       <button type="button" class="mod" data-mod="so" aria-pressed="false" hidden>Saúde Ocupacional</button>
       <button type="button" class="mod" data-mod="cd" aria-pressed="false">Cadastro de Informações</button>
       <button type="button" class="mod mod-sl" data-mod="sl" aria-pressed="false">Criador de Slides</button>
+    </div>
+    <div class="mods" id="pa-pills" role="group" aria-label="Planos de Ação" hidden>
+      <button type="button" class="mod2" data-pill="0" aria-pressed="false">Planos de Ação</button>
+      <button type="button" class="mod2" data-pill="1" aria-pressed="false">Indicadores e Gráficos</button>
+      <button type="button" class="mod2" data-pill="2" aria-pressed="false">Curva S</button>
     </div>
     <div class="top">
       <div><h1 id="h1">Scorecard SSMA Agrícola</h1><p id="scope"></p></div>
@@ -1621,7 +1626,7 @@ function grpSync() {
   const g = grpOf(ST.mod); GRP_LAST[g] = ST.mod;
   document.querySelectorAll('.grp').forEach(b => b.setAttribute('aria-pressed', b.dataset.grp === g));
   document.querySelectorAll('.mod').forEach(b => { b.hidden = !GRPS[g].includes(b.dataset.mod); });
-  const mm = document.querySelector('.mods'); if (mm) mm.dataset.solo = GRPS[g].length < 2 ? '1' : '0';
+  const mm = document.querySelector('.mods'); if (mm) mm.dataset.solo = GRPS[g].length < 2 && !['seg', 'amb', 'sau', 'cd'].includes(g) ? '1' : '0'; { const pp = document.getElementById('pa-pills'); if (pp) pp.hidden = ST.mod !== 'pa'; }
   const tb = document.querySelector('.tabs'); if (tb) tb.style.display = [...tb.querySelectorAll('.tab')].some(x => !x.hidden) ? '' : 'none';
 }
 const PH_TXT = { ma: ['Meio Ambiente', 'Este módulo está em construção e vai reunir os indicadores e as ferramentas de gestão ambiental.'], so: ['Saúde Ocupacional', 'Este módulo está em construção e vai reunir os indicadores e as ferramentas de saúde ocupacional.'] };
@@ -3729,11 +3734,15 @@ function paViewGraf() {
   ${tecO ? `<div class="cards one">${card('pa-g-tec', 'Planos por técnico de apoio', tecO)}</div>` : ''}`;
 }
 const PA_TITLES = { pmenu: 'Planos de Ação', pcad: 'Cadastro de Planos de Ação', pind: 'Indicadores dos Planos de Ação', pgraf: 'Gráficos dos Planos de Ação', pcurva: 'Curva S dos Planos de Ação' };
+const PA_PILLS = [['pmenu', 'pcad'], ['pind', 'pgraf'], ['pcurva']];
+document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('#pa-pills .mod2'); if (!b) return; ST.tab = PA_PILLS[+b.dataset.pill][0]; render(); });
 function paRender() {
   const app = $('#app'); app.classList.remove('cv', 'ci'); app.classList.add('pa'); app.classList.toggle('menu', ST.tab === 'pmenu');
   if (!PA_TITLES[ST.tab]) ST.tab = 'pmenu';
   document.querySelectorAll('.mod').forEach(b => b.setAttribute('aria-pressed', b.dataset.mod === 'pa'));
-  document.querySelectorAll('.tab').forEach(b => { b.hidden = b.dataset.mod !== 'pa'; b.setAttribute('aria-selected', b.dataset.tab === ST.tab); });
+  const pi = Math.max(0, PA_PILLS.findIndex(x => x.includes(ST.tab)));
+  document.querySelectorAll('.tab').forEach(b => { b.hidden = b.dataset.mod !== 'pa' || !PA_PILLS[pi].includes(b.dataset.tab); b.setAttribute('aria-selected', b.dataset.tab === ST.tab); });
+  document.querySelectorAll('#pa-pills .mod2').forEach(b => b.setAttribute('aria-pressed', +b.dataset.pill === pi));
   $('#h1').textContent = PA_TITLES[ST.tab]; $('#legend').innerHTML = ST.tab === 'pgraf' || ST.tab === 'pind' ? PA_ST.map(s => `<span class="lg"><span class="sw" style="background:${PA_STC[s]}"></span>${esc(s)}</span>`).join('') : ''; $('#scope').textContent = paScope();
   for (const k in EXP) delete EXP[k];
   paNormOnce(); paBuildFilters();
