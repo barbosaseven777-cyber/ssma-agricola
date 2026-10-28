@@ -2812,6 +2812,14 @@ async function ciaCarregarSite() {
     if (CIA.quando && new Date(CIA.quando).getTime() >= new Date(j.atualizadoEm || 0).getTime()) return;
     ciaSet(j.recs, j.arquivo, j.atualizadoEm, j.avisos); if (ST.mod === 'ci') { ciaBuildFilters(); render(); } } catch (e) { /* usa a base embutida */ }
 }
+function ciaPendBox() {
+  let b = document.getElementById('ci-pa-box'); if (b) b.remove(); if (!CIAS.pendPA) return;
+  const m = $('#ci-src'); if (!m) return; b = document.createElement('div'); b.id = 'ci-pa-box'; b.className = 'cdc wide'; b.style.margin = '8px 0';
+  b.innerHTML = `<h3>Enviar os planos de ação da investigação para Planos de Ação?</h3><p class="cdh">${CIAS.pendPA.n} plano(s) novo(s) encontrado(s) na aba de planos de ação desta planilha (os que já existem não serão duplicados).</p><div class="cdact"><button type="button" class="btn" id="ci-pa-sim" style="width:auto;padding:9px 20px">Sim, enviar ${CIAS.pendPA.n} plano(s)</button><button type="button" class="btn alt" id="ci-pa-nao" style="width:auto;padding:9px 20px">Não, só a base do CIA</button></div>`;
+  m.insertAdjacentElement('afterend', b);
+  $('#ci-pa-sim').onclick = () => { const r = paImportCia(CIAS.pendPA.aoa); CIAS.pendPA = null; b.remove(); ciaMsg(r.n + ' plano(s) de ação da investigação foram enviados para Planos de Ação.', 'ok'); };
+  $('#ci-pa-nao').onclick = () => { CIAS.pendPA = null; b.remove(); ciaMsg('Os planos de ação não foram enviados. A base do CIA foi carregada normalmente.', 'ok'); };
+}
 $('#ciaxl').addEventListener('change', async ev => {
   const f = ev.target.files[0]; if (!f) return;
   try {
@@ -2821,10 +2829,11 @@ $('#ciaxl').addEventListener('change', async ev => {
     if (!nomes.length) throw new Error('Não encontrei as abas de ocorrências (Pessoais, Patrimoniais ou Ambientais) neste arquivo.');
     const p = ciaParse(nomes.map(n => ({ nome: n, aoa: XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: true, defval: null }) })));
     if (!p.recs.length) throw new Error(p.avisos.join(' ') || 'Não encontrei ocorrências neste arquivo.');
-    let paMsg = ''; try { const nmP = wb.SheetNames.find(n => /plano.*acao/.test(ciaNorm(n))); if (nmP && typeof paImportCia === 'function') { const ri = paImportCia(XLSX.utils.sheet_to_json(wb.Sheets[nmP], { header: 1, raw: true, defval: null, range: { s: { r: 0, c: 0 }, e: { r: 4000, c: 80 } } })); paMsg = ri.n ? ' ' + ri.n + ' plano(s) de ação novo(s) da investigação já foram para Planos de Ação.' : ri.tot ? ' Os planos de ação da investigação já estavam em Planos de Ação.' : ''; } } catch (e) { paMsg = ' Não consegui trazer os planos de ação: ' + (e.message || e); }
+    let paMsg = ''; CIAS.pendPA = null; try { const nmP = wb.SheetNames.find(n => /plano.*acao/.test(ciaNorm(n))); if (nmP && typeof paImportCia === 'function') { const aoa = XLSX.utils.sheet_to_json(wb.Sheets[nmP], { header: 1, raw: true, defval: null, range: { s: { r: 0, c: 0 }, e: { r: 4000, c: 80 } } }), ri = paImportCia(aoa, true); if (ri.n) { CIAS.pendPA = { aoa, n: ri.n }; paMsg = ' A planilha tem ' + ri.n + ' plano(s) de ação novo(s) da investigação: escolha abaixo se quer enviá-los para Planos de Ação.'; } else if (ri.tot) paMsg = ' Os planos de ação da investigação já estavam em Planos de Ação.'; } } catch (e) { paMsg = ' Não consegui ler os planos de ação: ' + (e.message || e); }
     ciaSet(p.recs, f.name, new Date().toISOString(), p.avisos); CIADIRTY = true; CIAS.pg = 50; CIAS.safra = ''; CIAS.mes = 'all'; ciaBuildFilters(); render();
     const c = cvCount(CIA.recs, r => r.k);
     ciaMsg(`Base "${f.name}" carregada: ${cvN(CIA.recs.length)} ocorrências (${cvN(c.get('P') || 0)} pessoais, ${cvN(c.get('T') || 0)} patrimoniais, ${cvN(c.get('A') || 0)} ambientais). ` + p.avisos.join(' ') + paMsg + (SITE ? (GH && tokGet() ? ' Salvando no GitHub…' : ' Clique em Baixar cia.json e suba o arquivo no GitHub para todos verem.') : DB ? ' Salvando no link…' : ' Abra o painel pelo link para salvar.'), 'ok');
+    ciaPendBox();
     if (DB || (SITE && GH && tokGet())) ciaDoSave(true);
   } catch (e) { ciaMsg(e.message || 'Não consegui ler o arquivo.', 'err'); }
   ev.target.value = '';
@@ -4192,7 +4201,7 @@ function paDedupe() {
 }
 
 /* Planos de ação vindos da planilha do CIA (aba "Plano Ação"): só entram os que ainda não existem */
-function paImportCia(aoa) {
+function paImportCia(aoa, dry) {
   const nz = s => paN(String(s == null ? '' : s)), hi = aoa.findIndex(r => (r || []).some(c => /numero da ocorrencia/.test(nz(c))));
   if (hi < 0) return { n: 0, tot: 0, msg: 'aba de planos sem cabeçalho "Número da Ocorrência"' };
   const hd = aoa[hi].map(nz), col = re => hd.findIndex(h => re.test(h)), C = { cod: col(/numero da ocorrencia/), cls: col(/^classificacao/), data: col(/^data$/), niv: col(/^nivel/), faz: col(/^fazenda/), reg: col(/^regional/), causa: col(/^causa raiz/), acao: col(/^acao$/), rp: col(/responsavel pelo plano/), prop: col(/data\s*proposta/), conc: col(/data de conclusao/), st: col(/^status/), ac: col(/responsavel pelo acompanhamento/), efi: col(/eficaz/), obs: col(/^observacao/) };
@@ -4208,6 +4217,7 @@ function paImportCia(aoa) {
   if (rows.length < 2) return { n: 0, tot, msg: '' };
   const up = { rows, head: true, hrow: 0, map: {}, novaCat: false, upd: false }; PA_UPF.forEach((f, i) => { up.map[f[0]] = i; });
   const r = paUpBuild(up), novos = r.planos.filter(x => !x._exist && !PA.planos.some(p => (p.vinc || {}).cod === x.vinc.cod && paKey(p.titulo) === paKey(x.titulo))), hoje = paHoje();
+  if (dry) return { n: novos.length, tot, msg: '' };
   novos.forEach(x => { delete x._exist; x.id = paNovoId(x.cat); x.hist = []; x.criado = hoje; paHistUp(x); PA.planos.push(x); });
   if (novos.length) { paSave(); paNormOnce(true); }
   return { n: novos.length, tot, msg: '' };
