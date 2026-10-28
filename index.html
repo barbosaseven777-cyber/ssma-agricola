@@ -2321,7 +2321,7 @@ function ciaF(list, skip, mo) {
 }
 function ciaCvvF(skip, mo) {
   const sf = ciaSafra(), mes = mo === undefined ? CIAS.mes : mo, sk = skip || '';
-  return CVD.recs.filter(r => r.ok && (sk.includes('safra') || !sf || ciaSafraOf(r.m) === sf) && (sk.includes('mes') || mes === 'all' || r.m === mes) && (!CIAS.reg.size || CIAS.reg.has(r.reg)) && (!CIAS.faz.size || CIAS.faz.has(ciaFk(r.faz))));
+  return CVD.recs.filter(r => r.ok && (sk.includes('safra') || !sf || ciaSafraOf(r.m) === sf) && (sk.includes('mes') || mes === 'all' || r.m === mes) && (sk.includes('dm') || !CIAS.dm.size || CIAS.dm.has(String(+r.d.slice(8, 10)))) && (!CIAS.reg.size || CIAS.reg.has(r.reg)) && (!CIAS.faz.size || CIAS.faz.has(ciaFk(r.faz))));
 }
 function ciaScope(nm) {
   const sf = ciaSafra(), p = [sf ? 'Safra ' + sf : 'Todas as safras']; if (!nm) p.push(CIAS.mes === 'all' ? 'consolidado' : ciaMesFull(CIAS.mes));
