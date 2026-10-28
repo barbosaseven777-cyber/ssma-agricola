@@ -450,6 +450,7 @@ html[data-theme=dark] [style*="color:#6F7F74" i]{color:var(--muted)!important}
     <div class="field cv-only"><h2>Regional</h2><div class="checks" id="cv-reg"></div></div>
     <div class="field cv-only"><h2>Fazenda</h2><div class="scroll" id="cv-faz"></div></div>
     <div class="field cv-only"><h2>Mês</h2><select id="cv-mes" aria-label="Mês"></select></div>
+    <div class="field cv-only"><h2>Dia do mês</h2><div class="calg" id="cv-dia"></div></div>
     <button class="btn cv-only" id="cv-clear" type="button">Limpar filtros</button>
     <div class="field dd-only"><h2>NR aplicável</h2><div class="scroll" id="dd-nr"></div></div>
     <div class="field dd-only"><h2>Categoria</h2><div class="scroll" id="dd-cat"></div></div>
@@ -1836,7 +1837,7 @@ async function initDb() {
 const CV_COL = { 'Condição Insegura': '#E7672D', 'Quase Acidente': '#F1BC27', 'Desvio comportamental': '#2A7BA0', 'Dever de Recusa': '#7A4E9D' };
 const CV_MES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 const CV_HEAD = 'CVV - Canal Valor da Vida';
-const CVS = { ord: 'desc', sit: new Set(), area: new Set(), tipo: new Set(), reg: new Set(), faz: new Set(), mes: 'all', names: false, pg: 60 };
+const CVS = { ord: 'desc', dm: new Set(), sit: new Set(), area: new Set(), tipo: new Set(), reg: new Set(), faz: new Set(), mes: 'all', names: false, pg: 60 };
 let CVD = { recs: [], arquivo: '', quando: '', avisos: [] }, CVDIRTY = false, CVSAVING = false;
 const cvN = n => Number(n).toLocaleString('pt-BR');
 const cvP = (n, t) => t ? (n / t * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%' : '0%';
@@ -1848,7 +1849,7 @@ function cvSet(recs, arquivo, quando, avisos) {
 function cvFilt(list, skip) {
   const sk = skip || '';
   return list.filter(r => (sk.includes('sit') || !CVS.sit.size || CVS.sit.has(r.sit)) && (sk.includes('area') || !CVS.area.size || CVS.area.has(r.area)) && (sk.includes('tipo') || !CVS.tipo.size || CVS.tipo.has(r.tipo)) && (sk.includes('reg') || !CVS.reg.size || CVS.reg.has(r.reg)) &&
-    (sk.includes('faz') || !CVS.faz.size || CVS.faz.has(r.reg + '|' + r.faz)) && (sk.includes('mes') || CVS.mes === 'all' || r.m === CVS.mes));
+    (sk.includes('faz') || !CVS.faz.size || CVS.faz.has(r.reg + '|' + r.faz)) && (sk.includes('mes') || CVS.mes === 'all' || r.m === CVS.mes) && (sk.includes('dm') || !CVS.dm.size || CVS.dm.has(String(+r.d.slice(8, 10)))));
 }
 const cvCount = (list, f) => { const m = new Map(); list.forEach(r => { const k = f(r); m.set(k, (m.get(k) || 0) + 1); }); return m; };
 const cvSafraMonths = () => {
@@ -1860,6 +1861,7 @@ const cvSafraMonths = () => {
 function cvScopeText() {
   const p = ['Agrícola'];
   p.push(CVS.mes === 'all' ? 'todos os meses' : cvMesLbl(CVS.mes));
+  if (CVS.dm.size) p.push('Dia(s) ' + [...CVS.dm].sort((a, b) => a - b).join(', '));
   if (CVS.sit.size) p.push([...CVS.sit].join(', '));
   if (CVS.tipo.size) p.push('Tipo: ' + [...CVS.tipo].join(', '));
   if (CVS.area.size) p.push(CVS.area.size > 3 ? CVS.area.size + ' áreas' : [...CVS.area].join(', '));
@@ -1875,6 +1877,8 @@ function cvBuildFilters() {
   const fq = (d, f) => { fc[d] = cvCount(cvFilt(real, d), f); return fc[d]; }, fz = (d, k) => fc[d].get(k) || 0;
   const cs = cvCount(real, r => r.sit), ct = cvCount(real, r => r.tipo), ca = cvCount(real, r => r.area), cr = cvCount(all, r => r.reg);
   fq('sit', r => r.sit); fq('tipo', r => r.tipo); fq('area', r => r.area); fq('reg', r => r.reg); fq('faz', r => r.reg + '|' + r.faz);
+  { const cd = cvCount(cvFilt(real, 'dm'), r => String(+r.d.slice(8, 10))), mo = CVS.mes !== 'all' ? CVS.mes : '', nd = mo ? new Date(+mo.slice(0, 4), +mo.slice(5, 7), 0).getDate() : 31, lead = mo ? (new Date(+mo.slice(0, 4), +mo.slice(5, 7) - 1, 1).getDay() + 6) % 7 : 0;
+    $('#cv-dia').innerHTML = (mo ? ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].map(d => `<b>${d}</b>`).join('') + '<i></i>'.repeat(lead) : '') + Array.from({ length: nd }, (_, i) => { const v = String(i + 1), n = cd.get(v) || 0; return `<label class="cald${n ? '' : ' zero'}" title="${n} CVV"><input type="checkbox" data-cv="dm" data-v="${v}" ${CVS.dm.has(v) ? 'checked' : ''}><span>${v}${n ? `<small>${n}</small>` : ''}</span></label>`; }).join(''); }
   $('#cv-sit').innerHTML = CVV_SIT.map(s => chk('sit', s, s, fz('sit', s))).join('');
   $('#cv-tipo').innerHTML = CVV_TIPOS.concat([...ct.keys()].filter(t => t && !CVV_TIPOS.includes(t))).map(t => chk('tipo', t, t, fz('tipo', t))).join('');
   $('#cv-area').innerHTML = [...ca.keys()].sort((a, b) => ca.get(b) - ca.get(a)).map(a => chk('area', a, a, fz('area', a))).join('');
@@ -2082,7 +2086,7 @@ document.addEventListener('click', ev => {
   else if (t.id === 'cv-dlp') { cvSaveBlob(cvBaixarPlanos(cvPlanoLista(cvFilt(CVD.recs))), 'cvv-planos-de-acao.xlsx'); }
   else if (t.id === 'cv-dlc') { const d = cvFilt(CVD.recs).filter(r => r.ok && r.crit); cvSaveBlob(cvBaixarCrit(d), 'cvv-pontos-criticos.xlsx'); }
   else if (t.id === 'cv-dl') { const d = cvFilt(CVD.recs).filter(r => !r.ok); cvSaveBlob(cvBaixar(d, cvFilt(CVD.recs).filter(r => r.ok && r.revisar)), 'cvv-lancamentos-divergentes.xlsx'); }
-  else if (t.id === 'cv-clear') { ['sit', 'area', 'tipo', 'reg', 'faz'].forEach(k => CVS[k].clear()); CVS.mes = 'all'; CVS.pg = 60; cvBuildFilters(); cvRender(); }
+  else if (t.id === 'cv-clear') { ['dm', 'sit', 'area', 'tipo', 'reg', 'faz'].forEach(k => CVS[k].clear()); CVS.mes = 'all'; CVS.pg = 60; cvBuildFilters(); cvRender(); }
   else if (t.id === 'cv-save') cvDoSave(false);
   else if (t.classList.contains('mod')) { ST.mod = t.dataset.mod; ST.tab = ST.mod === 'cv' ? 'cmenu' : 'menu'; if (ST.mod === 'cv') cvBuildFilters(); render(); }
 });
