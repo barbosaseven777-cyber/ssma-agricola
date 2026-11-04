@@ -6012,7 +6012,8 @@ document.addEventListener('click', ev => {
   const filters = [{ dim: el.getAttribute('data-dim'), val: el.getAttribute('data-val') }], sr = t.closest('[data-sr]');
   if (sr) { const q = drResolve(ST.mod, sr.getAttribute('data-sr'), null); if (q && q.dim !== filters[0].dim) filters.push(q); }
   const card = el.closest('.card'), cam = card && card.querySelector('[data-exp]'), id = cam ? cam.getAttribute('data-exp') : '';
-  drMenu(ev, filters, id);
+  if (ev.shiftKey) { drMenu(ev, filters, id); return; }
+  drGo(ST.mod, filters, { srcId: id });
 });
 /* ---- menu de opções de leitura ao clicar numa barra ---- */
 const DR_NOTAB = /menu$|^dds$|^hier$/;
